@@ -16,7 +16,9 @@ import Card from 'primevue/card'
       The easiest way to organize a joyful gift exchange! No sign-up required.
       Create and share your Secret Santa event in just a few clicks.
     </p>
-    <Button>Get Started Now</Button>
+    <Button as="router-link" label="Router" to="register"
+      >Get Started Now</Button
+    >
   </section>
 
   <section class="grid grid-cols-1 gap-y-4 mt-8 text-center box-border px-8">
