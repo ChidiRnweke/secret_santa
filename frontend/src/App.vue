@@ -8,9 +8,9 @@ import BrandLogo from './components/BrandLogo.vue'
 
 <template>
   <header
-    class="mb-2 flex justify-between flex-row place-items-end align-middle"
+    class="mb-12 flex justify-between flex-row place-items-end align-middle"
   >
-    <BrandLogo />
+    <BrandLogo class="mr-4" />
     <nav class="flex flex-row gap-x-8 align-middle">
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/register">Register</RouterLink>
