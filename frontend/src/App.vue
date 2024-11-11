@@ -7,10 +7,13 @@ import BrandLogo from './components/BrandLogo.vue'
 </script>
 
 <template>
-  <header class="mb-2 flex justify-between flex-row place-items-end">
+  <header
+    class="mb-2 flex justify-between flex-row place-items-end align-middle"
+  >
     <BrandLogo />
-    <nav class="flex flex-row gap-x-8">
+    <nav class="flex flex-row gap-x-8 align-middle">
       <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/register">Register</RouterLink>
       <div>
         <DarkModeToggle class="bg-surface-0 dark:bg-surface-900 text-color" />
       </div>
