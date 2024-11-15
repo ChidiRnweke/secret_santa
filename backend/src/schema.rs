@@ -13,7 +13,7 @@ diesel::table! {
     user_assignments (id) {
         id -> Int4,
         #[max_length = 255]
-        buys_for -> Varchar,
+        // buys_for -> Varchar,
         #[max_length = 255]
         buys_from -> Varchar,
         created_at -> Timestamp,
@@ -23,7 +23,4 @@ diesel::table! {
 
 diesel::joinable!(user_assignments -> session (session_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    session,
-    user_assignments,
-);
+diesel::allow_tables_to_appear_in_same_query!(session, user_assignments,);
