@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    image: postgres
+    image: postgres:16.2-alpine
     restart: always
 
     ports:
@@ -12,3 +12,58 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: secret_santa
+
+  startup_container:
+    build:
+      context: docker/backend
+      dockerfile: Dockerfile
+    restart: "no"
+    depends_on:
+      - db
+    command: ["alembic", "upgrade", "head"]
+
+  secret_santa_backend:
+    environment:
+      - port=${PORT}
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${port:-8000}:${port:-8000}"
+    depends_on:
+      - db
+      - startup_container
+    command:
+      [
+        "gunicorn",
+        "app.main:app",
+        "--workers",
+        "2",
+        "--worker-class",
+        "uvicorn.workers.UvicornWorker",
+        "--bind",
+        "0.0.0.0:${port:-8000}",
+      ]
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:${port:-8000}/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  vault:
+    image: hashicorp/vault:1.18.1
+    restart: always
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+    ports:
+      - "8200:8200"
+
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_ADDR: "http://0.0.0.0:8200"
