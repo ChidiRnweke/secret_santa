@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "secret-santa"
+version = "0.1.0"
+description = ""
+authors = ["ChidiRNweke <chidi125@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["standard"], version = "^0.115.5"}
+sqlalchemy = "^2.0.36"
+python-dotenv = "^1.0.1"
+hvac = "^2.3.0"
+alembic = "^1.14.0"
+psycopg2 = "^2.9.10"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.7.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
