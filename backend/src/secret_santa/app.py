@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from secret_santa.models import (
     AssignmentInput,
@@ -66,9 +67,14 @@ async def get_assignment(
     return UserAssignment(buys_for=buy_for, buys_from=buys_from)
 
 
+@dataclass
+class HealthCheck:
+    status: str = "ok"
+
+
 @router.get("/health")
-def health_check():
-    return {"status": "ok"}
+def health_check() -> HealthCheck:
+    return HealthCheck()
 
 
 def create_app():
