@@ -51,7 +51,7 @@ async def make_assignment(
     return await controller.assign(assign_input)
 
 
-@router.post("/assignments/{assignment_id}/{buy_for}")
+@router.get("/assignments/{assignment_id}/{buy_for}")
 async def get_assignment(
     assignment_id: str,
     buy_for: str,
