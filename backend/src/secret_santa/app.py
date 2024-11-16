@@ -66,6 +66,11 @@ async def get_assignment(
     return UserAssignment(buys_for=buy_for, buys_from=buys_from)
 
 
+@router.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
 def create_app():
     app = FastAPI()
     app.include_router(router)
