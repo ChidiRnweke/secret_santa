@@ -1,6 +1,6 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
-
+from sqlalchemy import func
 from secret_santa.models import UserAssignment
 from typing import Protocol
 from sqlalchemy import select, ForeignKey
@@ -12,14 +12,14 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 
 class SantaSessionRepository(Protocol):
-    async def check_id_exists(self, id: str) -> bool: ...
+    async def check_if_name_exits(self, name: str) -> bool: ...
 
     async def add_santa_session(self, santa_session: "SantaSessionModel") -> None: ...
 
-    async def get_santa_session(self, id: str) -> "SantaSessionModel | None": ...
+    async def get_santa_session(self, name: str) -> "SantaSessionModel | None": ...
 
     async def get_assignment(
-        self, session_id: str, buys_for: str
+        self, session_name: str, buys_for: str
     ) -> "UserAssignmentModel | None": ...
 
 
@@ -27,8 +27,8 @@ class SantaSessionRepository(Protocol):
 class SantaRepository(SantaSessionRepository):
     session: AsyncSession
 
-    async def check_id_exists(self, id: str) -> bool:
-        expr = select(SantaSessionModel).where(SantaSessionModel.id == id)
+    async def check_if_name_exits(self, name: str) -> bool:
+        expr = select(SantaSessionModel).where(SantaSessionModel.name == name)
         result = await self.session.execute(expr)
         return bool(result.scalar_one_or_none())
 
@@ -36,17 +36,21 @@ class SantaRepository(SantaSessionRepository):
         self.session.add(santa_session)
         await self.session.commit()
 
-    async def get_santa_session(self, id: str) -> "SantaSessionModel | None":
-        expr = select(SantaSessionModel).where(SantaSessionModel.id == id)
+    async def get_santa_session(self, name: str) -> "SantaSessionModel | None":
+        expr = select(SantaSessionModel).where(SantaSessionModel.name == name)
         result = await self.session.execute(expr)
         return result.scalar_one_or_none()
 
     async def get_assignment(
-        self, session_id: str, buys_for: str
+        self, session_name: str, buys_for: str
     ) -> "UserAssignmentModel | None":
-        expr = select(UserAssignmentModel).where(
-            UserAssignmentModel.santa_session_id == session_id,
-            UserAssignmentModel.buys_for == buys_for,
+        expr = (
+            select(UserAssignmentModel)
+            .join(SantaSessionModel)
+            .where(
+                SantaSessionModel.name == session_name,
+                func.lower(UserAssignmentModel.buys_for) == buys_for.lower(),
+            )
         )
         result = await self.session.execute(expr)
         return result.scalar_one_or_none()
@@ -70,6 +74,12 @@ class UserAssignmentModel(Base):
     buys_for: Mapped[str]
     buys_from: Mapped[str]
     santa_session_id: Mapped[int] = mapped_column(ForeignKey("santa_sessions.id"))
+
+    santa_session: Mapped["SantaSessionModel"] = relationship(
+        back_populates="assignments",
+        primaryjoin="UserAssignmentModel.santa_session_id == SantaSessionModel.id",
+        viewonly=True,
+    )
 
     def to_domain_model(self) -> "UserAssignment":
         return UserAssignment(buys_for=self.buys_for, buys_from=self.buys_from)

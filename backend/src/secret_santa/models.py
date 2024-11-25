@@ -36,7 +36,7 @@ class UserAssignment:
 
 @dataclass
 class AssignmentOutput:
-    assignment_id: str
+    assignment_name: str
     assignments: list[UserAssignment]
 
 
