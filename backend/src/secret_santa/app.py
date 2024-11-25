@@ -56,7 +56,6 @@ async def make_assignment(
     assign_input: AssignmentInput,
     session: AsyncSession = Depends(get_session),
 ) -> AssignmentOutput:
-    logger.info("Making assignment")
     name_generator = get_name_generator()
     repo = SantaRepository(session)
     controller = AssignmentController(name_generator, repo)
