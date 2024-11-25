@@ -1,7 +1,19 @@
 from dotenv import load_dotenv
 import os
 from dataclasses import dataclass
-import hvac
+from enum import Enum
+from infisical_client import (
+    ClientSettings,
+    InfisicalClient,
+    GetSecretOptions,
+    AuthenticationOptions,
+    UniversalAuthMethod,
+)
+
+
+class RuntimeMode(Enum):
+    DEV = "DEV"
+    PROD = "PROD"
 
 
 class AppStartupError(Exception):
@@ -15,18 +27,16 @@ def get_env_or_raise(env_var: str) -> str:
     return value
 
 
-def validate_config() -> None:
-    AppConfig.from_config()
-
-
 @dataclass
 class AppConfig:
     connection_string: str
+    telemetry_endpoint: str
+    mode: RuntimeMode = RuntimeMode.PROD
 
     @classmethod
     def from_config(cls) -> "AppConfig":
         load_dotenv()
-        if os.getenv("DEV"):
+        if os.getenv("ENV") == "LOCAL":
             conf = cls._from_env()
         else:
             conf = cls._from_vault()
@@ -35,26 +45,60 @@ class AppConfig:
     @classmethod
     def _from_env(cls) -> "AppConfig":
         conn_str = get_env_or_raise("CONNECTION_STRING")
-        return cls(connection_string=conn_str)
+        telemetry_endpoint = get_env_or_raise("TELEMETRY_ENDPOINT")
+        return cls(
+            connection_string=conn_str,
+            telemetry_endpoint=telemetry_endpoint,
+            mode=RuntimeMode.DEV,
+        )
 
     @classmethod
     def _from_vault(cls) -> "AppConfig":
-        vault_addr = get_env_or_raise("VAULT_ADDR")
-        role_id = get_env_or_raise("VAULT_ROLE_ID")
-        secret_id = get_env_or_raise("VAULT_SECRET_ID")
-        vault_path = get_env_or_raise("VAULT_PATH")
+        client_id = get_env_or_raise("INFISICAL_CLIENT_ID")
+        client_secret = get_env_or_raise("INFISICAL_CLIENT_SECRET")
+        project_id = get_env_or_raise("INFISICAL_PROJECT_ID")
+        environment = get_env_or_raise("INFISICAL_ENVIRONMENT")
+        url = get_env_or_raise("INFISICAL_URL")
+
+        auth = UniversalAuthMethod(client_id=client_id, client_secret=client_secret)
+        auth_options = AuthenticationOptions(universal_auth=auth)
+        client_settings = ClientSettings(auth=auth_options, site_url=url)
         try:
-            client = hvac.Client(url=vault_addr)
-            client.auth.approle.login(role_id, secret_id)
+            client = InfisicalClient(client_settings)
+            conn_str = client.getSecret(
+                options=GetSecretOptions(
+                    environment=environment,
+                    project_id=project_id,
+                    secret_name="DATABASE_CONNECTION_STRING",
+                )
+            )
 
-            if not client.is_authenticated():
-                raise AppStartupError("Vault authentication failed.")
-            secret = client.read(vault_path)
+            telemetry_endpoint = client.getSecret(
+                options=GetSecretOptions(
+                    environment=environment,
+                    project_id=project_id,
+                    secret_name="TELEMETRY_ENDPOINT",
+                )
+            )
 
-            if not isinstance(secret, dict) or "data" not in secret:
-                raise AppStartupError("Secret not found in vault")
-
-            conn_str = secret["data"]["connection_string"]
+            conn_str = conn_str.secret_value
+            telemetry_endpoint = telemetry_endpoint.secret_value
         except Exception as e:
-            raise AppStartupError(f"Error reading secret from vault: {e}") from e
-        return cls(connection_string=conn_str)
+            raise AppStartupError(f"Error reading secret from infisical: {e}") from e
+        return cls(connection_string=conn_str, telemetry_endpoint=telemetry_endpoint)
+
+    def _read_secret(
+        self,
+        secret_name: str,
+        client: InfisicalClient,
+        project_id: str,
+        environment: str,
+    ) -> str:
+        secret = client.getSecret(
+            options=GetSecretOptions(
+                environment=environment,
+                project_id=project_id,
+                secret_name=secret_name,
+            )
+        )
+        return secret.secret_value
