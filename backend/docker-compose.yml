@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  startup_container:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    command: ["poetry", "run", "alembic", "upgrade", "head"]
+    networks:
+      - app-network
+
+  secret_santa_backend:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    restart: always
+    depends_on:
+      - startup_container
+    command:
+      [
+        "poetry",
+        "run",
+        "fastapi",
+        "run",
+        "src/secret_santa/app.py",
+        "--workers",
+        "2",
+        "--port",
+        "8000",
+      ]
+    healthcheck:
+      test: curl -f http://localhost:8000/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - reverse-proxy
+      - telemetry-network
+
+networks:
+  reverse-proxy:
+    external: true
+  telemetry-network:
+    external: true
