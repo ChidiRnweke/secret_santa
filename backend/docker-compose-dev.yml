@@ -6,7 +6,7 @@ services:
     restart: always
 
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
 
     environment:
       POSTGRES_USER: admin
@@ -15,54 +15,43 @@ services:
 
   startup_container:
     build:
-      context: docker/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/backend/Dockerfile
     restart: "no"
-    depends_on:
-      - db
-    command: ["alembic", "upgrade", "head"]
-
-  secret_santa_backend:
     environment:
-      - port=${PORT}
-    build:
-      context: backend
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "${port:-8000}:${port:-8000}"
+      - CONNECTION_STRING=postgresql://admin:admin@db:5432/secret_santa
     depends_on:
       - db
-      - startup_container
-    command:
-      [
-        "gunicorn",
-        "app.main:app",
-        "--workers",
-        "2",
-        "--worker-class",
-        "uvicorn.workers.UvicornWorker",
-        "--bind",
-        "0.0.0.0:${port:-8000}",
-      ]
-    healthcheck:
-      test:
-        ["CMD-SHELL", "curl -f http://localhost:${port:-8000}/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    command: ["poetry", "run", "alembic", "upgrade", "head"]
 
-  vault:
-    image: hashicorp/vault:1.18.1
-    restart: always
-    healthcheck:
-      test: ["CMD", "vault", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
+  otel_collector:
+    image: otel/opentelemetry-collector-contrib:0.113.0
     ports:
-      - "8200:8200"
+      - "4317:4317"
+    restart: always
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus-config.yml:/etc/prometheus/prometheus.yml
+
+  loki:
+    image: grafana/loki:3.2.1
+    restart: always
+    volumes:
+      - ./loki-config.yaml:/etc/loki/config.yaml
+    command: -config.file=/etc/loki/config.yaml
+
+  grafana:
+    image: grafana/grafana-oss:11.3.0
+    restart: always
+    ports:
+      - "3000:3000"
 
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: root
