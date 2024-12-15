@@ -7,6 +7,8 @@ on:
       - master
     paths:
       - "backend/**"
+      - "docker-compose.yml"
+      - "compose.override.yml"
 
 jobs:
   build-and-push:
