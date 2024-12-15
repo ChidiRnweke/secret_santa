@@ -37,6 +37,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            rm -rf /var/www/secret_santa/* 
-            tar --no-same-permissions --no-overwrite-dir -xzvf ~/build.tar.gz -C /var/www/secret_santa 
+            mkdir -p /var/www/${{ vars.PROJECT }}
+            rm -rf /var/www/${{ vars.PROJECT }}/* 
+            tar --no-same-permissions --no-overwrite-dir -xzvf ~/build.tar.gz -C /var/www/${{ vars.PROJECT }} 
             rm ~/build.tar.gz
