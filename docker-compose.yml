@@ -43,5 +43,7 @@ services:
 networks:
   reverse-proxy:
     external: true
+  app-network:
+    external: true
   telemetry-network:
     external: true
