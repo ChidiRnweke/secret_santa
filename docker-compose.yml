@@ -1,13 +1,23 @@
 version: "3.9"
 
+x-shared-environment: &shared-env
+  environment:
+    INFISICAL_CLIENT_ID: ${INFISICAL_CLIENT_ID}
+    INFISICAL_CLIENT_SECRET: ${INFISICAL_CLIENT_SECRET}
+    INFISICAL_PROJECT_ID: ${INFISICAL_PROJECT_ID}
+    INFISICAL_ENVIRONMENT: ${INFISICAL_ENVIRONMENT}
+    INFISICAL_URL: ${INFISICAL_URL}
+
 services:
   startup_container:
     image: ghcr.io/chidirnweke/secret_santa:latest
     container_name: startup_container
+
     restart: "no"
     command: ["poetry", "run", "alembic", "upgrade", "head"]
     networks:
       - app_network
+    <<: *shared-env
 
   secret_santa_backend:
     image: ghcr.io/chidirnweke/secret_santa:latest
@@ -35,6 +45,7 @@ services:
     networks:
       - reverse-proxy
       - telemetry-network
+    <<: *shared-env
 
 networks:
   reverse-proxy:
