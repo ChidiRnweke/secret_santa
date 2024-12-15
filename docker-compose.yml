@@ -7,7 +7,7 @@ services:
     restart: "no"
     command: ["poetry", "run", "alembic", "upgrade", "head"]
     networks:
-      - app-network
+      - app_network
 
   secret_santa_backend:
     image: ghcr.io/chidirnweke/secret_santa:latest
@@ -39,7 +39,7 @@ services:
 networks:
   reverse-proxy:
     external: true
-  app-network:
+  app_network:
     external: true
   telemetry-network:
     external: true
