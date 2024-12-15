@@ -100,7 +100,7 @@ async def lifespan(app: FastAPI):
 
 def create_app():
     app = FastAPI(lifespan=lifespan)
-    app.include_router(router)
+    app.include_router(router, prefix="/api")
 
     config = AppConfig.from_config()
     if config.mode == RuntimeMode.PROD:
