@@ -3,9 +3,9 @@ services:
   secret_santa_backend:
     build:
       context: .
-      dockerfile: backend/docker/backend/Dockerfile
+      dockerfile: docker/backend/Dockerfile
 
   startup_container:
     build:
       context: .
-      dockerfile: backend/docker/backend/Dockerfile
+      dockerfile: docker/backend/Dockerfile
