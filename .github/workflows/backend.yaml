@@ -36,7 +36,7 @@ jobs:
           echo "INFISICAL_CLIENT_SECRET=${{ secrets.INFISICAL_CLIENT_SECRET }}" >> .env
           echo "INFISICAL_PROJECT_ID=${{ secrets.INFISICAL_PROJECT_ID }}" >> .env
           echo "INFISICAL_URL=${{ secrets.INFISICAL_URL }}" >> .env
-          echo "INFISICAL_ENVIRONMENT="production" >> .env
+          echo "INFISICAL_ENVIRONMENT=production" >> .env
 
   deploy:
     needs: build-and-push
