@@ -7,6 +7,8 @@ on:
       - master
     paths:
       - "frontend/**"
+      - ".github/workflows/frontend.yaml"
+  workflow_dispatch:
 
 jobs:
   build:

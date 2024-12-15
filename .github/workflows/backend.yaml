@@ -9,6 +9,8 @@ on:
       - "backend/**"
       - "docker-compose.yml"
       - "compose.override.yml"
+      - ".github/workflows/backend.yaml"
+  workflow_dispatch:
 
 jobs:
   build-and-push:
