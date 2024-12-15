@@ -3,4 +3,4 @@ services:
   rag_backend:
     build:
       context: .
-      dockerfile: backend/docker/Dockerfile
+      dockerfile: backend/docker/backend/Dockerfile
