@@ -6,7 +6,7 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        'secret-santa': "url('src/assets/images/christmas.svg')",
+        'secret-santa': "url('/christmas.svg')",
       },
       fontFamily: {
         sans: ['Roboto', 'sans-serif'], // Sets Roboto as the default sans-serif
