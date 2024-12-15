@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Push Docker image to Docker Hub
-        run: docker compose -f docker-compose.yml -f compose.override.yml build --push
+        run: docker compose -f docker-compose.yml -f docker-compose.override.yml build --push
 
   deploy:
     needs: build-and-push
