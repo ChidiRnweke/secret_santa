@@ -2,5 +2,5 @@ version: "3.9"
 services:
   rag_backend:
     build:
-      context: .
+      context: backend/
       dockerfile: backend/docker/backend/Dockerfile
