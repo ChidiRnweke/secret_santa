@@ -18,7 +18,7 @@ FROM base as backend
 
 WORKDIR /app
 
-COPY . .
+COPY ./backend .
 
 RUN poetry check
 
