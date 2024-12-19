@@ -23,6 +23,7 @@ class SantaService {
     })
 
     if (error) {
+      console.error(error)
       throw new Error(JSON.stringify(error))
     }
     return data
@@ -30,14 +31,15 @@ class SantaService {
 
   async getAssignment(
     assignment_id: string,
-    buy_for: string,
+    gift_sender: string,
   ): Promise<UserAssignment> {
     const { data, error } = await this.client.GET(
-      '/assignments/{assignment_id}/{buy_for}',
-      { params: { path: { assignment_id, buy_for } } },
+      '/assignments/{assignment_id}/{gift_sender}',
+      { params: { path: { assignment_id, gift_sender } } },
     )
 
     if (error) {
+      console.error(error)
       throw new Error(JSON.stringify(error))
     }
     return data
