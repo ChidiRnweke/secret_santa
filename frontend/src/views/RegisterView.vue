@@ -137,6 +137,7 @@ const clearAssignments = () => {
     v-model:visible="assignmentsMade"
     modal
     class="box-border p-4 mx-4 w-max-content"
+    :closable="false"
   >
     <template #header>
       <h2 class="text-2xl">Here are your personalized links. Happy gifting!</h2>
