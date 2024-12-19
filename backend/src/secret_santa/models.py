@@ -30,8 +30,8 @@ class NameGenerator:
 
 @dataclass
 class UserAssignment:
-    buys_for: str
-    buys_from: str
+    gift_sender: str
+    gift_receiver: str
 
 
 @dataclass
@@ -55,7 +55,7 @@ class AssignmentInput(BaseModel):
     def assign(self) -> list[UserAssignment]:
         new_indices = self._random_derangement(len(self.users))
         return [
-            UserAssignment(buys_for=self.users[i], buys_from=self.users[j])
+            UserAssignment(gift_sender=self.users[i], gift_receiver=self.users[j])
             for i, j in enumerate(new_indices)
         ]
 

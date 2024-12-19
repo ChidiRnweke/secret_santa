@@ -26,8 +26,8 @@ class AssignmentController:
         await self.santa_session_repository.add_santa_session(santa_session)
         return AssignmentOutput(assignment_name=id, assignments=assignments)
 
-    async def get_assignment(self, session_id: str, buys_for: str) -> str | None:
+    async def get_assignment(self, session_id: str, gift_sender: str) -> str | None:
         assignment = await self.santa_session_repository.get_assignment(
-            session_id, buys_for
+            session_id, gift_sender
         )
-        return assignment.buys_from if assignment else None
+        return assignment.gift_receiver if assignment else None

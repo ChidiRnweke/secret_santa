@@ -19,7 +19,7 @@ class SantaSessionRepository(Protocol):
     async def get_santa_session(self, name: str) -> "SantaSessionModel | None": ...
 
     async def get_assignment(
-        self, session_name: str, buys_for: str
+        self, session_name: str, gift_sender: str
     ) -> "UserAssignmentModel | None": ...
 
 
@@ -42,14 +42,14 @@ class SantaRepository(SantaSessionRepository):
         return result.scalar_one_or_none()
 
     async def get_assignment(
-        self, session_name: str, buys_for: str
+        self, session_name: str, gift_sender: str
     ) -> "UserAssignmentModel | None":
         expr = (
             select(UserAssignmentModel)
             .join(SantaSessionModel)
             .where(
                 SantaSessionModel.name == session_name,
-                func.lower(UserAssignmentModel.buys_for) == buys_for.lower(),
+                func.lower(UserAssignmentModel.gift_sender) == gift_sender.lower(),
             )
         )
         result = await self.session.execute(expr)
@@ -71,8 +71,8 @@ class UserAssignmentModel(Base):
     __tablename__ = "user_assignments"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    buys_for: Mapped[str]
-    buys_from: Mapped[str]
+    gift_sender: Mapped[str]
+    gift_receiver: Mapped[str]
     santa_session_id: Mapped[int] = mapped_column(ForeignKey("santa_sessions.id"))
 
     santa_session: Mapped["SantaSessionModel"] = relationship(
@@ -82,8 +82,8 @@ class UserAssignmentModel(Base):
     )
 
     def to_domain_model(self) -> "UserAssignment":
-        return UserAssignment(buys_for=self.buys_for, buys_from=self.buys_from)
+        return UserAssignment(gift_receiver=self.gift_receiver, gift_sender=self.gift_sender)
 
     @classmethod
     def from_domain_model(cls, assignment: UserAssignment) -> "UserAssignmentModel":
-        return cls(buys_for=assignment.buys_for, buys_from=assignment.buys_from)
+        return cls(gift_receiver=assignment.gift_sender, gift_sender=assignment.gift_sender)
