@@ -11,7 +11,9 @@ from alembic import context
 config = context.config
 section = config.config_ini_section
 app_config = AppConfig.from_config()
-config.set_section_option(section, "CONNECTION_STRING", app_config.connection_string)
+config.set_section_option(
+    section, "CONNECTION_STRING", app_config.migrations_connection_string
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

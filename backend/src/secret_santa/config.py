@@ -30,6 +30,7 @@ def get_env_or_raise(env_var: str) -> str:
 @dataclass
 class AppConfig:
     connection_string: str
+    migrations_connection_string: str
     telemetry_endpoint: str
     mode: RuntimeMode = RuntimeMode.PROD
 
@@ -46,9 +47,11 @@ class AppConfig:
     def _from_env(cls) -> "AppConfig":
         conn_str = get_env_or_raise("CONNECTION_STRING")
         telemetry_endpoint = get_env_or_raise("TELEMETRY_ENDPOINT")
+        migrations_conn_str = get_env_or_raise("MIGRATIONS_DATABASE_CONNECTION_STRING")
         return cls(
             connection_string=conn_str,
             telemetry_endpoint=telemetry_endpoint,
+            migrations_connection_string=migrations_conn_str,
             mode=RuntimeMode.DEV,
         )
 
@@ -80,12 +83,23 @@ class AppConfig:
                     secret_name="TELEMETRY_ENDPOINT",
                 )
             )
-
+            migrations_conn_str = client.getSecret(
+                options=GetSecretOptions(
+                    environment=environment,
+                    project_id=project_id,
+                    secret_name="MIGRATIONS_DATABASE_CONNECTION_STRING",
+                )
+            )
             conn_str = conn_str.secret_value
             telemetry_endpoint = telemetry_endpoint.secret_value
+            migrations_conn_str = migrations_conn_str.secret_value
         except Exception as e:
             raise AppStartupError(f"Error reading secret from infisical: {e}") from e
-        return cls(connection_string=conn_str, telemetry_endpoint=telemetry_endpoint)
+        return cls(
+            connection_string=conn_str,
+            telemetry_endpoint=telemetry_endpoint,
+            migrations_connection_string=migrations_conn_str,
+        )
 
     def _read_secret(
         self,
