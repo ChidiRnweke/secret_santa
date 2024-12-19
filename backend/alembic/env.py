@@ -5,6 +5,8 @@ from sqlalchemy import pool
 from src.secret_santa.database import Base
 from src.secret_santa.config import AppConfig
 from alembic import context
+from src.secret_santa.telemetry import configure_telemetry
+from logging import getLogger
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -76,7 +78,15 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+configure_telemetry(app_config)
+logger = getLogger("app_logger")
+logger.info("Running migrations.")
+
+try:
+    if context.is_offline_mode():
+        run_migrations_offline()
+    else:
+        run_migrations_online()
+except Exception as e:
+    logger.error(f"Error running migrations: {e}")
+    raise e
