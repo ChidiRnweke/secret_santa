@@ -84,19 +84,17 @@ class HealthCheck:
 
 
 @router.get("/health")
-async def health_check(
-    session: AsyncSession = Depends(get_session),
-) -> HealthCheck:
+async def health_check(session: AsyncSession = Depends(get_session)) -> HealthCheck:
     name_generator = get_name_generator()
     repo = SantaRepository(session)
+
     controller = AssignmentController(name_generator, repo)
-    try:
-        output = await controller.assign(AssignmentInput(users=["T1", "T2"]))
-        await controller.remove_session(output.assignment_name)
-    except Exception as e:
-        logger.error(f"Health check failed, details: {str(e)}")
-        raise HTTPException(status_code=500, detail="Health check failed)") from e
-    return HealthCheck()
+    test_input = AssignmentInput(users=["test1", "test2"])
+    success = await controller.validate_dependencies(test_input)
+    if success:
+        return HealthCheck()
+    else:
+        raise HTTPException(status_code=500, detail="Health check failed")
 
 
 @asynccontextmanager

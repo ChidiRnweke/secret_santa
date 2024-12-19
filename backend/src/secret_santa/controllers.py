@@ -5,6 +5,9 @@ from secret_santa.database import (
     SantaSessionModel,
     UserAssignmentModel,
 )
+from logging import getLogger
+
+logger = getLogger("app_logger")
 
 
 @dataclass
@@ -34,3 +37,12 @@ class AssignmentController:
 
     async def remove_session(self, session_id: str) -> None:
         await self.santa_session_repository.remove_session(session_id)
+
+    async def validate_dependencies(self, test_input: AssignmentInput) -> bool:
+        try:
+            output = await self.assign(test_input)
+            await self.remove_session(output.assignment_name)
+            return True
+        except Exception as e:
+            logger.error(f"Health check failed, details: {str(e)}")
+            return False
