@@ -24,6 +24,7 @@ def configure_telemetry(app_config: AppConfig):
     resource = Resource.create({"service.name": "secret santa"})
     configure_metrics(app_config.telemetry_endpoint, resource)
     configure_logs(app_config.telemetry_endpoint, resource)
+    configure_spans(app_config.telemetry_endpoint, resource)
 
 
 def configure_spans(endpoint: str, telemetry_resource: Resource):
