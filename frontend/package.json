@@ -10,9 +10,11 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "openapi-codegen": "openapi-typescript ./backend-api.yaml -o ./src/lib/spec.d.ts"
   },
   "dependencies": {
+    "openapi-fetch": "^0.13.3",
     "postcss-import": "^16.1.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.1.1",
@@ -31,10 +33,11 @@
     "eslint": "^9.13.0",
     "eslint-plugin-vue": "^9.29.0",
     "npm-run-all2": "^7.0.1",
+    "openapi-typescript": "^7.4.4",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.14",
-    "typescript": "~5.6.0",
+    "typescript": "~5.6.3",
     "vite": "^5.4.10",
     "vue-tsc": "^2.1.6"
   }
