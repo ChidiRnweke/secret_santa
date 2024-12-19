@@ -3,8 +3,20 @@ import { ref, type Ref, computed } from 'vue'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
+import { santaService, type AssignmentResponse } from '@/lib/api'
+import Dialog from 'primevue/dialog'
+import ErrorComponent from '@/components/ErrorComponent.vue'
+
 const participant = ref('')
 const participants: Ref<string[], string[]> = ref([])
+const userAssignments: Ref<
+  AssignmentResponse | undefined,
+  AssignmentResponse | undefined
+> = ref()
+const assignmentsMade = computed(() => userAssignments.value !== undefined)
+const err = ref(false)
+const errMsg = ref('')
+
 const addParticipant = () => {
   participants.value.push(participant.value)
   participant.value = ''
@@ -16,10 +28,46 @@ const removeParticipant = (index: number) => {
 const resetParticipants = () => {
   participants.value = []
 }
-const sendParticipants = () => {
-  console.log(participants.value)
+
+const links = computed(() => {
+  const data = userAssignments.value
+  if (data === undefined) {
+    return []
+  } else {
+    return data.assignments.map(assignment => {
+      return {
+        sender: assignment.gift_sender,
+        gift_link: new URL(
+          `/gift/${data.assignment_name}/${assignment.gift_sender}`,
+          window.location.origin,
+        ).toString(),
+      }
+    })
+  }
+})
+
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text)
+}
+
+const sendParticipants = async () => {
+  try {
+    const created_assignments = await santaService.makeAssignment({
+      users: participants.value,
+    })
+    userAssignments.value = created_assignments
+  } catch (e) {
+    console.log(e)
+    err.value = true
+    errMsg.value = (e as Error).message
+  }
+}
+
+const clearAssignments = () => {
+  userAssignments.value = undefined
 }
 </script>
+
 <template>
   <div class="flex place-content-center flex-col gap-y-12">
     <section>
@@ -80,4 +128,42 @@ const sendParticipants = () => {
       </ButtonGroup>
     </section>
   </div>
+  <ErrorComponent
+    v-model:visible="err"
+    :errorMessage="errMsg"
+    @update:visible="err = $event"
+  />
+  <Dialog
+    v-model:visible="assignmentsMade"
+    modal
+    class="box-border p-4 mx-4 w-max-content"
+  >
+    <template #header>
+      <h2 class="text-2xl">Here are your personalized links. Happy gifting!</h2>
+    </template>
+    <div class="flex flex-col gap-y-4">
+      <div
+        v-for="link in links"
+        :key="link.sender"
+        class="flex flex-row items-center gap-x-2"
+      >
+        <Button
+          icon="pi pi-copy"
+          aria-label="copy"
+          @click="copyToClipboard(link.gift_link)"
+          class="p-2"
+        />
+        <p class="text-lg">{{ link.sender }}'s link:</p>
+        <InputText
+          type="text"
+          :value="link.gift_link"
+          readonly
+          class="border p-1 max-w-72 w-full"
+        />
+      </div>
+    </div>
+    <template #footer>
+      <Button type="button" label="Cancel" @click="clearAssignments"></Button>
+    </template>
+  </Dialog>
 </template>
