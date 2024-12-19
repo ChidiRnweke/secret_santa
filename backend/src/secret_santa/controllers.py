@@ -31,3 +31,6 @@ class AssignmentController:
             session_id, gift_sender
         )
         return assignment.gift_receiver if assignment else None
+
+    async def remove_session(self, session_id: str) -> None:
+        await self.santa_session_repository.remove_session(session_id)

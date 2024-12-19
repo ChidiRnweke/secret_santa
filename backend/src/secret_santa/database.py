@@ -22,6 +22,8 @@ class SantaSessionRepository(Protocol):
         self, session_name: str, gift_sender: str
     ) -> "UserAssignmentModel | None": ...
 
+    async def remove_session(self, session_id: str) -> None: ...
+
 
 @dataclass
 class SantaRepository(SantaSessionRepository):
@@ -40,6 +42,14 @@ class SantaRepository(SantaSessionRepository):
         expr = select(SantaSessionModel).where(SantaSessionModel.name == name)
         result = await self.session.execute(expr)
         return result.scalar_one_or_none()
+
+    async def remove_session(self, session_id: str) -> None:
+        expr = select(SantaSessionModel).where(SantaSessionModel.name == session_id)
+        result = await self.session.execute(expr)
+        session = result.scalar_one_or_none()
+        if session is not None:
+            await self.session.delete(session)
+            await self.session.commit()
 
     async def get_assignment(
         self, session_name: str, gift_sender: str
@@ -82,8 +92,12 @@ class UserAssignmentModel(Base):
     )
 
     def to_domain_model(self) -> "UserAssignment":
-        return UserAssignment(gift_receiver=self.gift_receiver, gift_sender=self.gift_sender)
+        return UserAssignment(
+            gift_receiver=self.gift_receiver, gift_sender=self.gift_sender
+        )
 
     @classmethod
     def from_domain_model(cls, assignment: UserAssignment) -> "UserAssignmentModel":
-        return cls(gift_receiver=assignment.gift_sender, gift_sender=assignment.gift_sender)
+        return cls(
+            gift_receiver=assignment.gift_sender, gift_sender=assignment.gift_sender
+        )
