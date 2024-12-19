@@ -99,5 +99,5 @@ class UserAssignmentModel(Base):
     @classmethod
     def from_domain_model(cls, assignment: UserAssignment) -> "UserAssignmentModel":
         return cls(
-            gift_receiver=assignment.gift_sender, gift_sender=assignment.gift_sender
+            gift_receiver=assignment.gift_receiver, gift_sender=assignment.gift_sender
         )
