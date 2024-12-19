@@ -94,8 +94,8 @@ async def health_check(
         output = await controller.assign(AssignmentInput(users=["T1", "T2"]))
         await controller.remove_session(output.assignment_name)
     except Exception as e:
-        logger.error(str(e))
-        raise HTTPException(status_code=500, detail="Health check failed)")
+        logger.error(f"Health check failed, details: {str(e)}")
+        raise HTTPException(status_code=500, detail="Health check failed)") from e
     return HealthCheck()
 
 
