@@ -1,10 +1,11 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-const backendAPI = process.env.BACKEND_API || 'http://localhost:8000'
-
+const env = loadEnv('', process.cwd())
+const backendAPI = env.VITE_APP_BACKEND_API || 'http://localhost:8000'
+console.log('backendAPI:', backendAPI)
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
@@ -15,10 +16,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
-        target: backendAPI,
-        changeOrigin: true,
-      },
+      '/api': backendAPI,
     },
   },
 })
