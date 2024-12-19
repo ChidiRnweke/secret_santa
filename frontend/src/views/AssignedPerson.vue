@@ -65,9 +65,9 @@ onMounted(async () => {
         >{{ receiver }}!</span
       >
     </h1>
-    <p class="text-xl">
-      You can now start preparing your gift for your Secret Santa recipient.
-      Good luck and have fun!
+    <p class="text-3xl">
+      You can now start preparing your gift for {{ receiver }}. Good luck and
+      have fun!
     </p>
   </section>
 </template>
