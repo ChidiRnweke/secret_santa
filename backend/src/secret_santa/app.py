@@ -62,20 +62,20 @@ async def make_assignment(
     return await controller.assign(assign_input)
 
 
-@router.get("/assignments/{assignment_id}/{buy_for}")
+@router.get("/assignments/{assignment_id}/{gift_sender}")
 async def get_assignment(
     assignment_id: str,
-    buy_for: str,
+    gift_sender: str,
     session: AsyncSession = Depends(get_session),
 ) -> UserAssignment:
     repo = SantaRepository(session)
     name_generator = get_name_generator()
     controller = AssignmentController(name_generator, repo)
-    buys_from = await controller.get_assignment(assignment_id, buy_for)
-    if buys_from is None:
-        logger.info(f"Assignment not found for {buy_for}")
+    gift_receiver = await controller.get_assignment(assignment_id, gift_sender)
+    if gift_receiver is None:
+        logger.info(f"Assignment not found for {gift_sender}")
         raise HTTPException(status_code=404, detail="Assignment not found")
-    return UserAssignment(buys_for=buy_for, buys_from=buys_from)
+    return UserAssignment(gift_sender=gift_sender, gift_receiver=gift_receiver)
 
 
 @dataclass

@@ -45,6 +45,20 @@ class AssignmentInput(BaseModel):
 
     @field_validator("users")
     @classmethod
+    def _check_min_users(cls, users: list[str]) -> list[str]:
+        if len(users) < 2:
+            raise ValueError("At least two users are required")
+        return users
+
+    @field_validator("users")
+    @classmethod
+    def _no_empty_users(cls, users: list[str]) -> list[str]:
+        if not all(users):
+            raise ValueError("User names cannot be empty")
+        return users
+
+    @field_validator("users")
+    @classmethod
     def _check_unique_users(cls, users: list[str]) -> list[str]:
         if not users:
             raise ValueError("Users list cannot be empty")
