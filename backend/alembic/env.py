@@ -87,6 +87,7 @@ try:
         run_migrations_offline()
     else:
         run_migrations_online()
+    logger.info("Migrations completed.")
 except Exception as e:
     logger.error(f"Error running migrations: {e}")
     raise e
