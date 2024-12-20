@@ -45,8 +45,7 @@ class SantaRepository(SantaSessionRepository):
 
     async def remove_session(self, session_id: str) -> None:
         expr = select(SantaSessionModel).where(SantaSessionModel.name == session_id)
-        result = await self.session.execute(expr)
-        session = result.scalar_one_or_none()
+        session = await self.session.scalar(expr)
         if session is not None:
             await self.session.delete(session)
             await self.session.commit()
@@ -62,14 +61,14 @@ class SantaRepository(SantaSessionRepository):
                 func.lower(UserAssignmentModel.gift_sender) == gift_sender.lower(),
             )
         )
-        result = await self.session.execute(expr)
-        assignment = result.scalar_one_or_none()
+        assignment = await self.session.scalar(expr)
         if assignment is not None:
             await self._increment_view_count(assignment)
         return assignment
 
     async def _increment_view_count(self, assignment: "UserAssignmentModel") -> None:
         assignment.times_viewed += 1
+        self.session.add(assignment)
         await self.session.commit()
 
 

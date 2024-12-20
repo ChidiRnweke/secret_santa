@@ -75,11 +75,7 @@ async def get_assignment(
     if assignment is None:
         logger.info(f"Assignment not found for {gift_sender}")
         raise HTTPException(status_code=404, detail="Assignment not found")
-    return UserAssignment(
-        gift_sender=assignment.gift_sender,
-        gift_receiver=assignment.gift_receiver,
-        times_viewed=assignment.times_viewed,
-    )
+    return assignment.to_domain_model()
 
 
 @dataclass
@@ -106,7 +102,7 @@ async def lifespan(app: FastAPI):
     config = AppConfig.from_config()
     _app_config["app_config"] = config
     engine = create_async_engine(config.connection_string)
-    _session_store["session_maker"] = async_sessionmaker(engine)
+    _session_store["session_maker"] = async_sessionmaker(engine, expire_on_commit=False)
     _name_generator["name_generator"] = NameGenerator.from_config()
     yield
 

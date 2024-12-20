@@ -18,12 +18,13 @@ const senderId = route.params.senderName as string
 
 onMounted(async () => {
   try {
-    const { gift_sender, gift_receiver } = await santaService.getAssignment(
+    const { gift_sender, gift_receiver, times_viewed } = await santaService.getAssignment(
       santaId,
       senderId,
     )
     sender.value = gift_sender
     receiver.value = gift_receiver
+    linkOpenedTimes.value = times_viewed
     loading.value = false
   } catch (e) {
     console.error(e)
@@ -70,6 +71,9 @@ onMounted(async () => {
       You can now start preparing your gift for {{ receiver }}. Good luck and
       have fun! 🎁
     </p>
-    <p>PS: this link has been opened {{ linkOpenedTimes }} times.</p>
+    <p v-if="linkOpenedTimes==1">
+      ✨ You're the first to open this link. ✨
+    </p>
+    <p v-else>PS: this link has been opened <span class="text-primary-700 dark:text-primary-300">{{ linkOpenedTimes }}</span> times.</p>
   </section>
 </template>
