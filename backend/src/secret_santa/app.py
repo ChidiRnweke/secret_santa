@@ -71,11 +71,15 @@ async def get_assignment(
     repo = SantaRepository(session)
     name_generator = get_name_generator()
     controller = AssignmentController(name_generator, repo)
-    gift_receiver = await controller.get_assignment(assignment_id, gift_sender)
-    if gift_receiver is None:
+    assignment = await controller.get_assignment(assignment_id, gift_sender)
+    if assignment is None:
         logger.info(f"Assignment not found for {gift_sender}")
         raise HTTPException(status_code=404, detail="Assignment not found")
-    return UserAssignment(gift_sender=gift_sender, gift_receiver=gift_receiver)
+    return UserAssignment(
+        gift_sender=assignment.gift_sender,
+        gift_receiver=assignment.gift_receiver,
+        times_viewed=assignment.times_viewed,
+    )
 
 
 @dataclass

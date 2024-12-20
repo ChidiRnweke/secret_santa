@@ -29,11 +29,12 @@ class AssignmentController:
         await self.santa_session_repository.add_santa_session(santa_session)
         return AssignmentOutput(assignment_name=id, assignments=assignments)
 
-    async def get_assignment(self, session_id: str, gift_sender: str) -> str | None:
-        assignment = await self.santa_session_repository.get_assignment(
+    async def get_assignment(
+        self, session_id: str, gift_sender: str
+    ) -> UserAssignmentModel | None:
+        return await self.santa_session_repository.get_assignment(
             session_id, gift_sender
         )
-        return assignment.gift_receiver if assignment else None
 
     async def remove_session(self, session_id: str) -> None:
         await self.santa_session_repository.remove_session(session_id)
