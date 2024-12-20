@@ -32,6 +32,7 @@ class NameGenerator:
 class UserAssignment:
     gift_sender: str
     gift_receiver: str
+    times_viewed: int
 
 
 @dataclass
@@ -69,7 +70,9 @@ class AssignmentInput(BaseModel):
     def assign(self) -> list[UserAssignment]:
         new_indices = self._random_derangement(len(self.users))
         return [
-            UserAssignment(gift_sender=self.users[i], gift_receiver=self.users[j])
+            UserAssignment(
+                gift_sender=self.users[i], gift_receiver=self.users[j], times_viewed=0
+            )
             for i, j in enumerate(new_indices)
         ]
 

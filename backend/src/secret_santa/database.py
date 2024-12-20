@@ -63,7 +63,14 @@ class SantaRepository(SantaSessionRepository):
             )
         )
         result = await self.session.execute(expr)
-        return result.scalar_one_or_none()
+        assignment = result.scalar_one_or_none()
+        if assignment is not None:
+            await self._increment_view_count(assignment)
+        return assignment
+
+    async def _increment_view_count(self, assignment: "UserAssignmentModel") -> None:
+        assignment.times_viewed += 1
+        await self.session.commit()
 
 
 class SantaSessionModel(Base):
@@ -83,6 +90,7 @@ class UserAssignmentModel(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     gift_sender: Mapped[str]
     gift_receiver: Mapped[str]
+    times_viewed: Mapped[int] = mapped_column(default=0)
     santa_session_id: Mapped[int] = mapped_column(ForeignKey("santa_sessions.id"))
 
     santa_session: Mapped["SantaSessionModel"] = relationship(
@@ -93,7 +101,9 @@ class UserAssignmentModel(Base):
 
     def to_domain_model(self) -> "UserAssignment":
         return UserAssignment(
-            gift_receiver=self.gift_receiver, gift_sender=self.gift_sender
+            gift_receiver=self.gift_receiver,
+            gift_sender=self.gift_sender,
+            times_viewed=self.times_viewed,
         )
 
     @classmethod

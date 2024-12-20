@@ -90,6 +90,8 @@ export interface components {
             gift_sender: string;
             /** Gift Receiver */
             gift_receiver: string;
+            /** Times Viewed */
+            times_viewed: number;
         };
         /** ValidationError */
         ValidationError: {

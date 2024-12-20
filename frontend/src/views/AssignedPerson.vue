@@ -10,6 +10,7 @@ const error = ref(false)
 const errorMessage = ref('')
 const sender = ref('')
 const receiver = ref('')
+const linkOpenedTimes = ref(0)
 
 const route = useRoute()
 const santaId = route.params.sessionId as string
@@ -56,7 +57,7 @@ onMounted(async () => {
   </section>
 
   <section
-    v-else
+    v-if="!loading && !error"
     class="text-center grid grid-cols-1 gap-y-8 justify-items-center border-box lg:mx-32 md:mx-20 mx-8 mb-32"
   >
     <h1 class="text-6xl">
@@ -67,7 +68,8 @@ onMounted(async () => {
     </h1>
     <p class="text-3xl">
       You can now start preparing your gift for {{ receiver }}. Good luck and
-      have fun!
+      have fun! 🎁
     </p>
+    <p>PS: this link has been opened {{ linkOpenedTimes }} times.</p>
   </section>
 </template>
